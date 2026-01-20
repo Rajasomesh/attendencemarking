@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Attendance</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      margin: 10px 0 15px;
+      color: #2c3e50;
+    }
+
+    .container {
+      background: #ffffff;
+      margin: 10px auto;
+      padding: 16px;
+      border-radius: 14px;
+      width: 95%;
+      max-width: 420px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      flex: 1;
+      text-align: center;
+    }
+
+    select {
+      font-size: 16px;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+    }
+
+    #rolls {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .roll {
+      padding: 14px 0;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .roll:hover {
+      background: #e3f2fd;
+    }
+
+    .roll:active {
+      transform: scale(0.95);
+    }
+
+    .absent {
+      background-color: #e53935;
+      color: white;
+      border-color: #c62828;
+    }
+
+    button {
+      width: 100%;
+      font-size: 16px;
+      padding: 14px;
+      margin-top: 16px;
+      border-radius: 12px;
+      border: none;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #result {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #2e7d32;
+      word-break: break-word;
+    }
+
+    footer {
+      background: #2c3e50;
+      color: #ffffff;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    footer span {
+      color: #4fc3f7;
+      font-weight: 600;
+    }
+
+    @media (max-width: 360px) {
+      .roll {
+        font-size: 14px;
+        padding: 12px 0;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Attendance</h2>
+
+    <select id="classSelect" onchange="loadClass()">
+      <option value="">Select Class</option>
+      <option value="2nd Year IT">2nd Year IT</option>
+      <option value="3rd Year IT - A">3rd Year IT - A</option>
+      <option value="3rd Year IT - B">3rd Year IT - B</option>
+      <option value="4th Year IT - A">4th Year IT - A</option>
+      <option value="4th Year IT - B">4th Year IT - B</option>
+    </select>
+
+    <div id="rolls"></div>
+
+    <button onclick="copyAbsent()">Copy Attendance Text</button>
+
+    <p id="result"></p>
+  </div>
+
+  <footer>
+    Developed by <span>Raja</span>
+  </footer>
+
+<script>
+  let absent = new Set();
+  let currentRollList = [];
+
+  function getRollNumbers(className) {
+
+    if (className === "3rd Year IT - A") {
+      let rolls = [];
+      for (let i = 1; i <= 66; i++) rolls.push(i.toString());
+      for (let i = 1; i <= 7; i++) rolls.push("LE-" + i);
+      return rolls;
+    }
+
+    if (className === "3rd Year IT - B") {
+      let rolls = [];
+      for (let i = 67; i <= 99; i++) rolls.push(i.toString());
+      ["A", "B", "C"].forEach(letter => {
+        for (let i = 0; i <= 9; i++) rolls.push(letter + i);
+      });
+      rolls.push("D0");
+      for (let i = 8; i <= 14; i++) rolls.push("LE-" + i);
+      return rolls;
+    }
+
+    let rolls = [];
+    for (let i = 1; i <= 60; i++) rolls.push(i.toString());
+    return rolls;
+  }
+
+  function loadClass() {
+    absent.clear();
+    document.getElementById("result").innerText = "";
+    const rollsDiv = document.getElementById("rolls");
+    rollsDiv.innerHTML = "";
+
+    const className = document.getElementById("classSelect").value;
+    if (!className) return;
+
+    currentRollList = getRollNumbers(className);
+
+    currentRollList.forEach(roll => {
+      const div = document.createElement("div");
+      div.innerText = roll;
+      div.className = "roll";
+      div.onclick = () => {
+        if (absent.has(roll)) {
+          absent.delete(roll);
+          div.classList.remove("absent");
+        } else {
+          absent.add(roll);
+          div.classList.add("absent");
+        }
+      };
+      rollsDiv.appendChild(div);
+    });
+  }
+
+  function copyAbsent() {
+    const className = document.getElementById("classSelect").value;
+    if (!className) {
+      alert("Please select a class");
+      return;
+    }
+
+    const orderedAbsent = currentRollList.filter(r => absent.has(r));
+
+    let text = orderedAbsent.length === 0
+      ? className + " : All Present"
+      : className + " : " + orderedAbsent.join(",");
+
+    navigator.clipboard.writeText(text);
+    document.getElementById("result").innerText = "Copied: " + text;
+  }
+</script>
+
+</body>
+</html>
