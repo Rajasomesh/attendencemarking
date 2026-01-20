@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: "Segoe UI", Arial, sans-serif;
@@ -20,8 +18,14 @@
     }
 
     h2 {
-      margin: 10px 0 15px;
+      margin: 10px 0 5px;
       color: #2c3e50;
+    }
+
+    #dateDisplay {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 12px;
     }
 
     .container {
@@ -49,7 +53,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
       gap: 10px;
-      margin-top: 10px;
     }
 
     .roll {
@@ -59,17 +62,7 @@
       background: #fafafa;
       font-size: 15px;
       cursor: pointer;
-      transition: transform 0.1s ease, background 0.2s ease;
       user-select: none;
-      touch-action: manipulation;
-    }
-
-    .roll:hover {
-      background: #e3f2fd;
-    }
-
-    .roll:active {
-      transform: scale(0.95);
     }
 
     .absent {
@@ -90,21 +83,17 @@
       cursor: pointer;
     }
 
-    button:active {
-      transform: scale(0.98);
-    }
-
     #result {
       margin-top: 12px;
       font-weight: 600;
       font-size: 14px;
       color: #2e7d32;
-      word-break: break-word;
+      white-space: pre-line; /* IMPORTANT */
     }
 
     footer {
       background: #2c3e50;
-      color: #ffffff;
+      color: white;
       padding: 10px;
       text-align: center;
       font-size: 13px;
@@ -114,52 +103,50 @@
       color: #4fc3f7;
       font-weight: 600;
     }
-
-    @media (max-width: 360px) {
-      .roll {
-        font-size: 14px;
-        padding: 12px 0;
-      }
-
-      button {
-        font-size: 15px;
-        padding: 12px;
-      }
-    }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
-    <h2>Attendance</h2>
+<div class="container">
+  <h2>Attendance</h2>
+  <p id="dateDisplay"></p>
 
-    <select id="classSelect" onchange="loadClass()">
-      <option value="">Select Class</option>
-      <option value="2nd Year IT">2nd Year IT</option>
-      <option value="3rd Year IT - A">3rd Year IT - A</option>
-      <option value="3rd Year IT - B">3rd Year IT - B</option>
-      <option value="4th Year IT - A">4th Year IT - A</option>
-      <option value="4th Year IT - B">4th Year IT - B</option>
-    </select>
+  <select id="classSelect" onchange="loadClass()">
+    <option value="">Select Class</option>
+    <option value="2nd Year IT">2nd Year IT</option>
+    <option value="3rd Year IT - A">3rd Year IT - A</option>
+    <option value="3rd Year IT - B">3rd Year IT - B</option>
+    <option value="4th Year IT - A">4th Year IT - A</option>
+    <option value="4th Year IT - B">4th Year IT - B</option>
+  </select>
 
-    <div id="rolls"></div>
+  <div id="rolls"></div>
 
-    <button onclick="copyAbsent()">Copy Attendance Text</button>
+  <button onclick="copyAbsent()">Copy Attendance Text</button>
+  <p id="result"></p>
+</div>
 
-    <p id="result"></p>
-  </div>
-
-  <footer>
-    Developed by <span>Raja</span>
-  </footer>
+<footer>
+  Developed by <span>Raja</span>
+</footer>
 
 <script>
   let absent = new Set();
   let currentRollList = [];
 
-  function getRollNumbers(className) {
+  function getTodayDateDDMMYYYY() {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
+  document.getElementById("dateDisplay").innerText =
+    "Date : " + getTodayDateDDMMYYYY();
+
+  function getRollNumbers(className) {
     if (className === "3rd Year IT - A") {
       let rolls = [];
       for (let i = 1; i <= 66; i++) rolls.push(i.toString());
@@ -170,8 +157,8 @@
     if (className === "3rd Year IT - B") {
       let rolls = [];
       for (let i = 67; i <= 99; i++) rolls.push(i.toString());
-      ["A", "B", "C"].forEach(letter => {
-        for (let i = 0; i <= 9; i++) rolls.push(letter + i);
+      ["A", "B", "C"].forEach(l => {
+        for (let i = 0; i <= 9; i++) rolls.push(l + i);
       });
       rolls.push("D0");
       for (let i = 8; i <= 14; i++) rolls.push("LE-" + i);
@@ -218,14 +205,16 @@
       return;
     }
 
+    const dateStr = getTodayDateDDMMYYYY();
     const orderedAbsent = currentRollList.filter(r => absent.has(r));
 
-    let text = orderedAbsent.length === 0
-      ? className + " : All Present"
-      : className + " : " + orderedAbsent.join(",");
+    let text =
+      orderedAbsent.length === 0
+        ? `${dateStr}\n${className} : All Present`
+        : `${dateStr}\n${className} : ${orderedAbsent.join(",")}`;
 
     navigator.clipboard.writeText(text);
-    document.getElementById("result").innerText = "Copied: " + text;
+    document.getElementById("result").innerText = text;
   }
 </script>
 
