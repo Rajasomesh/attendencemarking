@@ -88,7 +88,7 @@
       font-weight: 600;
       font-size: 14px;
       color: #2e7d32;
-      white-space: pre-line; /* IMPORTANT */
+      white-space: pre-line;
     }
 
     footer {
@@ -147,26 +147,46 @@
     "Date : " + getTodayDateDDMMYYYY();
 
   function getRollNumbers(className) {
+    let rolls = [];
+
+    if (className === "2nd Year IT") {
+      for (let i = 1; i <= 66; i++) rolls.push(i.toString());
+      for (let i = 1; i <= 6; i++) rolls.push("LE-" + i);
+      rolls.push("238T1A1208");
+      return rolls;
+    }
+
     if (className === "3rd Year IT - A") {
-      let rolls = [];
       for (let i = 1; i <= 66; i++) rolls.push(i.toString());
       for (let i = 1; i <= 7; i++) rolls.push("LE-" + i);
       return rolls;
     }
 
     if (className === "3rd Year IT - B") {
-      let rolls = [];
       for (let i = 67; i <= 99; i++) rolls.push(i.toString());
-      ["A", "B", "C"].forEach(l => {
-        for (let i = 0; i <= 9; i++) rolls.push(l + i);
+      ["A","B","C"].forEach(l => {
+        for (let i = 0; i <= 9; i++) rolls.push(l+i);
       });
       rolls.push("D0");
       for (let i = 8; i <= 14; i++) rolls.push("LE-" + i);
       return rolls;
     }
 
-    let rolls = [];
-    for (let i = 1; i <= 60; i++) rolls.push(i.toString());
+    if (className === "4th Year IT - A") {
+      for (let i = 1; i <= 64; i++) rolls.push(i.toString());
+      for (let i = 1; i <= 7; i++) rolls.push("LE-" + i);
+      return rolls;
+    }
+
+    if (className === "4th Year IT - B") {
+      for (let i = 65; i <= 99; i++) rolls.push(i.toString());
+      for (let i = 0; i <= 9; i++) rolls.push("A" + i);
+      for (let i = 0; i <= 9; i++) rolls.push("B" + i);
+      for (let i = 0; i <= 3; i++) rolls.push("C" + i);
+      for (let i = 8; i <= 14; i++) rolls.push("LE-" + i);
+      return rolls;
+    }
+
     return rolls;
   }
 
