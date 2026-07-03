@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>Attendance</title>
@@ -220,6 +220,269 @@
 
   function copyAbsent() {
     const className = document.getElementById("classSelect").value;
+    if (!className) {
+      alert("Please select a class");
+      return;
+    }
+
+    const dateStr = getTodayDateDDMMYYYY();
+    const orderedAbsent = currentRollList.filter(r => absent.has(r));
+
+    let text =
+      orderedAbsent.length === 0
+        ? `${dateStr}\n${className} : All Present`
+        : `${dateStr}\n${className} : ${orderedAbsent.join(",")}`;
+
+    navigator.clipboard.writeText(text);
+    document.getElementById("result").innerText = text;
+  }
+</script>
+
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Attendance</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      margin: 10px 0 5px;
+      color: #2c3e50;
+    }
+
+    #dateDisplay {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .container {
+      background: #ffffff;
+      margin: 10px auto;
+      padding: 16px;
+      border-radius: 14px;
+      width: 95%;
+      max-width: 420px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      flex: 1;
+      text-align: center;
+    }
+
+    select {
+      font-size: 16px;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+    }
+
+    #rolls {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+    }
+
+    .roll {
+      padding: 14px 0;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      font-size: 15px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .absent {
+      background-color: #e53935;
+      color: white;
+      border-color: #c62828;
+    }
+
+    button {
+      width: 100%;
+      font-size: 16px;
+      padding: 14px;
+      margin-top: 16px;
+      border-radius: 12px;
+      border: none;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #2e7d32;
+      white-space: pre-line;
+    }
+
+    footer {
+      background: #2c3e50;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    footer span {
+      color: #4fc3f7;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Attendance</h2>
+  <p id="dateDisplay"></p>
+
+  <select id="classSelect" onchange="loadClass()">
+    <option value="">Select Class</option>
+    <option value="3rd Year IT">3rd Year IT</option>
+    <option value="4th Year IT - A">4th Year IT - A</option>
+    <option value="4th Year IT - B">4th Year IT - B</option>
+  </select>
+
+  <div id="rolls"></div>
+
+  <button onclick="copyAbsent()">Copy Attendance Text</button>
+  <p id="result"></p>
+</div>
+
+<footer>
+  Developed by <span>Raja</span>
+</footer>
+
+<script>
+  let absent = new Set();
+  let currentRollList = [];
+
+  function getTodayDateDDMMYYYY() {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  document.getElementById("dateDisplay").innerText =
+    "Date : " + getTodayDateDDMMYYYY();
+
+  function getRollNumbers(className) {
+    let rolls = [];
+
+    // New 3rd Year (Old 2nd Year)
+    if (className === "3rd Year IT") {
+
+      const detained = [28, 41, 51, 60];
+
+      for (let i = 1; i <= 66; i++) {
+        if (!detained.includes(i)) {
+          rolls.push(i.toString());
+        }
+      }
+
+      for (let i = 1; i <= 6; i++) {
+        rolls.push("LE-" + i);
+      }
+
+      rolls.push("238T1A1208");
+
+      return rolls;
+    }
+
+    // New 4th Year A (Old 3rd Year A)
+    if (className === "4th Year IT - A") {
+
+      for (let i = 1; i <= 66; i++) {
+        rolls.push(i.toString());
+      }
+
+      for (let i = 1; i <= 7; i++) {
+        rolls.push("LE-" + i);
+      }
+
+      return rolls;
+    }
+
+    // New 4th Year B (Old 3rd Year B)
+    if (className === "4th Year IT - B") {
+
+      for (let i = 67; i <= 99; i++) {
+        if (i !== 73 && i !== 86) {
+          rolls.push(i.toString());
+        }
+      }
+
+      ["A", "B", "C"].forEach(letter => {
+        for (let i = 0; i <= 9; i++) {
+          rolls.push(letter + i);
+        }
+      });
+
+      rolls.push("D0");
+
+      for (let i = 8; i <= 14; i++) {
+        rolls.push("LE-" + i);
+      }
+
+      return rolls;
+    }
+
+    return rolls;
+  }
+
+  function loadClass() {
+    absent.clear();
+    document.getElementById("result").innerText = "";
+    const rollsDiv = document.getElementById("rolls");
+    rollsDiv.innerHTML = "";
+
+    const className = document.getElementById("classSelect").value;
+    if (!className) return;
+
+    currentRollList = getRollNumbers(className);
+
+    currentRollList.forEach(roll => {
+      const div = document.createElement("div");
+      div.innerText = roll;
+      div.className = "roll";
+
+      div.onclick = () => {
+        if (absent.has(roll)) {
+          absent.delete(roll);
+          div.classList.remove("absent");
+        } else {
+          absent.add(roll);
+          div.classList.add("absent");
+        }
+      };
+
+      rollsDiv.appendChild(div);
+    });
+  }
+
+  function copyAbsent() {
+    const className = document.getElementById("classSelect").value;
+
     if (!className) {
       alert("Please select a class");
       return;
